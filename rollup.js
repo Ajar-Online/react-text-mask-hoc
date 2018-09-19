@@ -4,12 +4,33 @@ const rollup = require('rollup');
 const babel = require('rollup-plugin-babel');
 const resolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
-const {list: babelHelpersList} = require('babel-helpers');
 const pkg = require('./package.json');
 
-const externalHelpersWhitelist = babelHelpersList.filter(helperName => helperName !== 'asyncGenerator');
-const plugins = [babel({externalHelpersWhitelist}), resolve(), commonjs()];
-const external = ['react', 'react-native'].concat(Object.keys(pkg.dependencies));
+const plugins = [
+    babel({
+        babelrc: false,
+        exclude: 'node_modules/**',
+        presets: [
+            '@babel/react',
+            [
+                '@babel/env',
+                {
+                    modules: false,
+                    targets: {
+                        node: 5,
+                    },
+                },
+            ],
+        ],
+        plugins: ['@babel/plugin-proposal-class-properties'],
+    }),
+    resolve(),
+    commonjs(),
+];
+
+const external = ['react', 'react-native'].concat(
+    Object.keys(pkg.dependencies),
+);
 
 rollup
     .rollup({
